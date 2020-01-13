@@ -12,8 +12,12 @@ $(OUTPUT_DIR)/CMakeFiles:
 	$(CONFIGURE) -DCMAKE_BUILD_TYPE=$(VERSION)
 
 prepare:$(OUTPUT_DIR)/CMakeFiles
+	@cmake --build $(OUTPUT_DIR) --target libssh2
+	@rm -rf $(OUTPUT_DIR)
+	@$(CONFIGURE) -DCMAKE_BUILD_TYPE=$(VERSION)
 	@cmake --build $(OUTPUT_DIR) --target libgit2
 	@rm -rf $(OUTPUT_DIR)
+	@$(CONFIGURE) -DCMAKE_BUILD_TYPE=$(VERSION)
 	@$(CONFIGURE) -DCMAKE_BUILD_TYPE=$(VERSION)
 
 cppCodeFeaturesExtractor: $(OUTPUT_DIR)/Makefile
