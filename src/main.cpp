@@ -27,13 +27,25 @@ int credentialsCallBack(git_cred** out, const char* url, const char* userFromUrl
 {
 	std::string user, pass;
 
-	std::cout << "Please enter username to clone from " << url << " (" << userFromUrl << "):"<<  std::endl;
+	std::cout << "Please enter username to clone from " << url << " (" << userFromUrl << "):" << std::endl;
 	std::cin >> user;
-	std::cout << "Please enter password for " << user  << ":" << std::endl;
+	std::cout << "Please enter password for " << user << ":" << std::endl;
 	std::cin >> pass;
 
 	return git_cred_userpass_plaintext_new(out, user.c_str(), pass.c_str());
 }
+
+int fetchProgressCallBack(const git_transfer_progress *stats, void *payload)
+{
+	auto fetchPercent = (100 * stats->received_objects) / stats->total_objects;
+	auto indexPercent = (100 * stats->indexed_objects) / stats->total_objects;
+	auto kiloBytes = stats->received_bytes / 1024;
+
+	std::cout << "Fetch progress: network " << fetchPercent << "% (" << kiloBytes << " kb, " << stats->received_objects << "/" << stats->total_objects<< "), index " << indexPercent << "% (" << stats->indexed_objects << "/" << stats->total_objects << ")" << std::endl;
+
+	return 0;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -47,6 +59,7 @@ int main(int argc, char *argv[])
 	
 	git_clone_options cloneOptions = GIT_CLONE_OPTIONS_INIT;
 	cloneOptions.fetch_opts.callbacks.credentials = credentialsCallBack;
+	cloneOptions.fetch_opts.callbacks.transfer_progress = fetchProgressCallBack;
 
 	git_repository* repo = nullptr;
 	int error = git_clone(&repo, argv[1], argv[2], &cloneOptions);
